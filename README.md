@@ -1,29 +1,72 @@
-# 🧾 Digital Notice Board System
 
-A real-time web-based Digital Notice Board that allows departments to upload, schedule, and display notices dynamically using Flask and Socket.IO.
+# 📢 Digital Notice Board System
 
----
-
-## 🚀 Features
-
-* 🔐 User Authentication (Login / Signup)
-* 🏫 Department-based Admin Panels (CSE, IT, ECE, MECH)
-* 📤 Upload Notices (Images, Videos, Audio, Documents)
-* ⏰ Schedule Notices for Future Display
-* 🗑️ Delete Individual or All Notices
-* 📡 Real-time Updates using WebSockets
-* 🖥️ Public Slideshow Display (Auto-rotating)
-* 📱 Responsive UI
+A real-time **Digital Notice Board Web Application** built using Flask, Socket.IO, and SQLite.  
+It allows admins to upload, schedule, and manage notices, while users can view them in a live slideshow format.
 
 ---
 
-## 🧠 Tech Stack
+## 🚀 Live Demo
 
-* **Frontend:** HTML, CSS, JavaScript
-* **Backend:** Flask
-* **Database:** SQLite
-* **Real-time:** Flask-SocketIO
-* **Server:** Gunicorn
+🔗 **Deployed on Render:**  
+👉 https://digit-board.onrender.com
+
+📺 Example Slideshow:  
+👉 https://digit-board.onrender.com/slideshow/cse
+
+---
+
+## ✨ Features
+
+- 🔐 User Authentication (Login / Signup)
+- 🏢 Department-based Admin Panels (CSE, IT, ECE, MECH)
+- 📤 Upload Notices (Image, Video, Audio, Documents)
+- ⏰ Schedule Notices (Auto display at specific time)
+- 🗑️ Delete Single / All Notices
+- 📡 Real-time updates using Socket.IO
+- 🖥️ Public Notice View
+- 🎬 Slideshow Mode (Auto rotating display)
+- 📱 Fully Responsive (Mobile Friendly)
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Flask
+- **Database:** SQLite (SQLAlchemy)
+- **Realtime:** Flask-SocketIO
+- **Deployment:** Render
+
+---
+
+## 📂 Project Structure
+
+
+
+📁 digital-notice-board
+│
+├── 📁 templates
+│   ├── base.html
+│   ├── index.html
+│   ├── login.html
+│   ├── signup.html
+│   ├── dashboard.html
+│   ├── admin.html
+│   ├── schedule_notice.html
+│   ├── public.html
+│   └── slideshow.html
+│
+├── 📁 static
+│   ├── styles.css
+│   └── script.js
+│
+├── 📁 uploads
+├── main.py
+├── requirements.txt
+└── README.md
+
+
 
 ---
 
@@ -41,7 +84,7 @@ A real-time web-based Digital Notice Board that allows departments to upload, sc
 ### 🛠️ Admin Panel
 ![Admin](screenshots/admin.png)
 
-### 🖥️ Slideshow Display
+### 🎬 Slideshow Display
 ![Slideshow](screenshots/slideshow.png)
 
 ### 📱 Mobile View
@@ -49,64 +92,70 @@ A real-time web-based Digital Notice Board that allows departments to upload, sc
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Installation (Local Setup)
 
 ```bash
-git clone https://github.com/your-username/digital-notice-board.git
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/digital-notice-board.git
+
+# Navigate to project
 cd digital-notice-board
 
+# Create virtual environment
 python -m venv venv
+
+# Activate virtual environment
 venv\Scripts\activate   # Windows
 
+# Install dependencies
 pip install -r requirements.txt
+
+# Run application
 python main.py
-```
+````
 
 ---
 
 ## 🌐 Usage
 
-* Open: http://127.0.0.1:5000
-* Login / Signup
-* Select Department
-* Upload or Schedule Notices
-* View slideshow:
+1. Open browser → `http://127.0.0.1:5000`
+2. Signup / Login
+3. Select department
+4. Admin password format:
 
 ```
-http://127.0.0.1:5000/slideshow/<department>
+cse@22
+it@22
+ece@22
+mech@22
 ```
 
-Example:
+5. Upload or schedule notices
+6. View slideshow:
 
 ```
-http://127.0.0.1:5000/slideshow/ece
+/slideshow/<department>
 ```
 
 ---
 
-## ☁️ Deployment
+## 🎯 Future Enhancements
 
-This project can be deployed on platforms like:
-
-* Render
-* Railway
-* Heroku
-
----
-
-## ⚠️ Limitations
-
-* Uploaded files are stored locally
-* On free hosting (Render), files may not persist after restart
+* 🔔 Email Notifications
+* 📊 Admin Analytics Dashboard
+* ☁️ Cloud File Storage (AWS S3)
+* 👥 Role-based Access Control
+* 📅 Calendar View for Scheduled Notices
 
 ---
 
-## 🔮 Future Improvements
+## 🧠 Learnings
 
-* Cloud Storage Integration (AWS S3 / Cloudinary)
-* Role-based authentication
-* Fullscreen TV Mode
-* Notice categories & filters
+* Real-time communication using WebSockets
+* File handling in Flask
+* Database management with SQLAlchemy
+* Deployment using Render
+* Responsive UI design
 
 ---
 
@@ -116,6 +165,8 @@ This project can be deployed on platforms like:
 
 ---
 
-## ⭐ Show your support
+## ⭐ Show Your Support
 
 If you like this project, give it a ⭐ on GitHub!
+
+```
