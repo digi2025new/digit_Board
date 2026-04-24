@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 
 # ✅ FIX: Remove eventlet dependency
-socketio = SocketIO(app, async_mode='threading')
+socketio = SocketIO(app, async_mode='eventlet')
 
 # -------------------- DATABASE MODEL --------------------
 class Notice(db.Model):
