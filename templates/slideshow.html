@@ -1,18 +1,31 @@
 {% extends "base.html" %}
 {% set hide_nav = true %}
 {% block content %}
+
 <div class="slideshow-container" style="max-width: 1400px; width: 95%; margin: 0 auto; padding: 10px; text-align: center;">
   <h2>{{ department | upper }} Slideshow</h2>
+
+  <!-- ✅ Show message if no notices -->
+  {% if notices|length == 0 %}
+    <p style="margin-top:20px;">No notices available</p>
+  {% endif %}
+
   <div class="slideshow" id="slideshow" style="position: relative; overflow: hidden;">
     {% for notice in notices %}
       <div id="slide-{{ notice[0] }}" class="slide" style="display: none;">
         {% set file_url = url_for('uploaded_file', filename=notice[2]) %}
+
         {% if notice[3] in ['png', 'jpg', 'jpeg', 'gif', 'pdf_image'] %}
-          <img src="{{ file_url }}" alt="Notice Image" style="width: 100%; max-height: 90vh; object-fit: contain;">
+          <img src="{{ file_url }}" alt="Notice Image"
+               style="width: 100%; max-height: 90vh; object-fit: contain;">
+
         {% elif notice[3] == 'mp4' %}
-          <video src="{{ file_url }}" autoplay muted playsinline controls style="width: 100%; max-height: 90vh; object-fit: contain;"></video>
+          <video src="{{ file_url }}" autoplay muted playsinline controls
+                 style="width: 100%; max-height: 90vh; object-fit: contain;"></video>
+
         {% elif notice[3] == 'mp3' %}
           <audio src="{{ file_url }}" autoplay controls style="width: 100%;"></audio>
+
         {% else %}
           <a href="{{ file_url }}" target="_blank" download>View Document</a>
         {% endif %}
@@ -23,111 +36,136 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
   let slides = document.querySelectorAll('.slideshow .slide');
   let currentIndex = 0;
   let slideInterval;
 
   function showSlide(index) {
     clearTimeout(slideInterval);
+
+    if (slides.length === 0) return; // ✅ prevent crash
+
     slides.forEach(slide => slide.style.display = 'none');
-    if (slides[index]) {
-      slides[index].style.display = 'block';
-      let video = slides[index].querySelector('video');
-      if (video) {
-        video.currentTime = 0;
-        video.onended = nextSlide;
-      } else {
-        slideInterval = setTimeout(nextSlide, 5000);
-      }
+
+    let currentSlide = slides[index];
+    currentSlide.style.display = 'block';
+
+    let video = currentSlide.querySelector('video');
+
+    if (video) {
+      video.currentTime = 0;
+      video.play().catch(()=>{});
+      video.onended = nextSlide;
+    } else {
+      slideInterval = setTimeout(nextSlide, 4000); // ✅ smoother timing
     }
   }
 
   function nextSlide() {
+    if (slides.length === 0) return;
     currentIndex = (currentIndex + 1) % slides.length;
     showSlide(currentIndex);
   }
 
   function startSlideshow() {
+    if (slides.length === 0) return; // ✅ prevent blank page
     currentIndex = 0;
     showSlide(currentIndex);
   }
 
   startSlideshow();
 
-  // Initialize Socket.IO and join the department room.
+  // ---------------- SOCKET.IO ----------------
   var socket = io();
   socket.emit('join', '{{ department }}');
 
-  // Helper to create a slide element.
   function createSlide(notice) {
     let slide = document.createElement('div');
     slide.id = "slide-" + notice.id;
     slide.className = 'slide';
     slide.style.display = 'none';
+
     let fileUrl = "/uploads/" + notice.filename;
     let html = "";
+
     if (['png', 'jpg', 'jpeg', 'gif', 'pdf_image'].includes(notice.filetype)) {
-      html = `<img src="${fileUrl}" alt="Notice Image" style="width: 100%; max-height: 90vh; object-fit: contain;">`;
-    } else if (notice.filetype === 'mp4') {
-      html = `<video src="${fileUrl}" autoplay muted playsinline controls style="width: 100%; max-height: 90vh; object-fit: contain;"></video>`;
-    } else if (notice.filetype === 'mp3') {
-      html = `<audio src="${fileUrl}" autoplay controls style="width: 100%;"></audio>`;
-    } else {
-      html = `<a href="${fileUrl}" target="_blank" download>View Document</a>`;
+      html = `<img src="${fileUrl}" style="width:100%; max-height:90vh; object-fit:contain;">`;
+    } 
+    else if (notice.filetype === 'mp4') {
+      html = `<video src="${fileUrl}" autoplay muted playsinline controls style="width:100%; max-height:90vh;"></video>`;
+    } 
+    else if (notice.filetype === 'mp3') {
+      html = `<audio src="${fileUrl}" autoplay controls style="width:100%;"></audio>`;
+    } 
+    else {
+      html = `<a href="${fileUrl}" target="_blank">View Document</a>`;
     }
+
     slide.innerHTML = html;
     return slide;
   }
 
-  // Immediate notices are added as soon as they're received.
+  // ✅ New immediate notice
   socket.on('new_notice', function(data) {
-    if(document.getElementById("slide-" + data.id)) return;
+    if (document.getElementById("slide-" + data.id)) return;
+
     let slide = createSlide(data);
-    let slideshow = document.getElementById('slideshow');
-    slideshow.insertBefore(slide, slideshow.firstChild);
+    let container = document.getElementById('slideshow');
+
+    container.insertBefore(slide, container.firstChild);
+
     slides = document.querySelectorAll('.slideshow .slide');
     startSlideshow();
   });
 
-  // Prescheduled notices: schedule insertion based on the scheduled time.
+  // ✅ Prescheduled notice
   socket.on('new_prescheduled_notice', function(data) {
-    // Assume data.scheduled_time is in "YYYY-MM-DD HH:MM:SS" format (UTC)
-    let scheduledTime = new Date(data.scheduled_time + " UTC");
+
+    let scheduledTime = new Date(data.scheduled_time);
     let delay = scheduledTime.getTime() - Date.now();
-    if (delay > 0) {
-      setTimeout(function() {
-        if (!document.getElementById("slide-" + data.id)) {
-          let slide = createSlide(data);
-          let slideshow = document.getElementById('slideshow');
-          slideshow.insertBefore(slide, slideshow.firstChild);
-          slides = document.querySelectorAll('.slideshow .slide');
-          startSlideshow();
-        }
-      }, delay);
-    } else {
-      // If scheduled time is already passed, add immediately.
+
+    function addSlide() {
       if (!document.getElementById("slide-" + data.id)) {
         let slide = createSlide(data);
-        let slideshow = document.getElementById('slideshow');
-        slideshow.insertBefore(slide, slideshow.firstChild);
+        let container = document.getElementById('slideshow');
+
+        container.insertBefore(slide, container.firstChild);
+
         slides = document.querySelectorAll('.slideshow .slide');
         startSlideshow();
       }
     }
+
+    if (delay > 0) {
+      setTimeout(addSlide, delay);
+    } else {
+      addSlide();
+    }
   });
 
-  // Delete events remove the slide immediately.
+  // ✅ Delete notice
   socket.on('delete_notice', function(data) {
+    if (data.all) {
+      document.getElementById('slideshow').innerHTML = "";
+      slides = [];
+      return;
+    }
+
     let elem = document.getElementById("slide-" + data.id);
     if (elem) {
-      elem.parentNode.removeChild(elem);
+      elem.remove();
       slides = document.querySelectorAll('.slideshow .slide');
+
       if (currentIndex >= slides.length) {
         currentIndex = 0;
       }
+
       showSlide(currentIndex);
     }
   });
+
 });
 </script>
+
 {% endblock %}
