@@ -1,5 +1,5 @@
 
-# 📢 Digital Notice Board System
+# 📢 Digital Notice Board using IoT
 
 A real-time **Digital Notice Board Web Application** built using Flask, Socket.IO, and SQLite.  
 It allows admins to upload, schedule, and manage notices, while users can view them in a live slideshow format.
